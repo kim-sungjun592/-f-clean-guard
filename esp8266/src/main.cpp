@@ -3,9 +3,9 @@
 #include <WiFiClientSecure.h>
 #include <DHT.h>
 
-#define DHTPIN D2
+#define DHTPIN 2
 #define DHTTYPE DHT11
-
+#define MQ135_PIN A0
 
 
 DHT dht(DHTPIN, DHTTYPE);
@@ -18,7 +18,7 @@ const char* password = "12345678";
 const char* serverUrl = "https://kbu1.dothome.co.kr/upload.php";
 
 // 3. 대시보드 '장치 관리'에 등록된 장치 ID와 반드시 똑같아야 함
-const char* DEVICE_ID = "D1-005";
+const char* DEVICE_ID = "D1-003";
 
 void setup() {
   Serial.begin(115200);
@@ -60,12 +60,13 @@ void loop() {
     http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
     http.addHeader("Content-Type", "application/json");
 
-    // upload.php가 읽는 JSON 형식: id, temperature, humidity
-    String body = "{\"id\":\"" + String(DEVICE_ID) + "\"," +
-                  "\"temperature\":" + String(temp, 1) + "," +
-                  "\"humidity\":" + String(hum, 1) + "," +
-                  "\"airQuality\":0}"; // 공기질 센서 없음 -> 숫자 0 (서버 컬럼이 숫자형)
+    int air = analogRead(A0);   // MQ-135를 A0에 연결했을 때 (0~1023)
 
+String body = "{\"id\":\"" + String(DEVICE_ID) + "\"," +
+              "\"temperature\":" + String(temp, 1) + "," +
+              "\"humidity\":" + String(hum, 1) + "," +
+              "\"airQuality\":" + String(air) + "}";
+              
     int httpResponseCode = http.POST(body);
 
     Serial.print("HTTP Response code: ");
