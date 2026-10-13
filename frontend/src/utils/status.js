@@ -1,42 +1,65 @@
-export function getStatusInfo(temp, humidity, airQuality) {
-
-    if (temp <= 5) {
-        return {
-            label: "🚨 동파 위험",
-            level: "danger",
-            bg: "bg-red-50 hover:bg-red-100",
-            text: "text-red-700",
-            border: "border-red-300"
-        };
-    }
-
-    if (humidity >= 90) {
-        return {
-            label: "⚠ 누수 의심",
-            level: "warning",
-            bg: "bg-amber-50 hover:bg-amber-100",
-            text: "text-amber-700",
-            border: "border-amber-300"
-        };
-    }
-
-    if (airQuality === "나쁨") {
-        return {
-            label: "⚠ 악취 발생",
-            level: "warning",
-            bg: "bg-amber-50 hover:bg-amber-100",
-            text: "text-amber-700",
-            border: "border-amber-300"
-        };
-    }
-
-    return {
-        label: "🟢 정상",
+const STYLE = {
+    danger: {
+        level: "danger",
+        bg: "bg-red-50 hover:bg-red-100",
+        text: "text-red-700",
+        border: "border-red-300"
+    },
+    warning: {
+        level: "warning",
+        bg: "bg-amber-50 hover:bg-amber-100",
+        text: "text-amber-700",
+        border: "border-amber-300"
+    },
+    normal: {
         level: "normal",
         bg: "bg-emerald-50 hover:bg-emerald-100",
         text: "text-emerald-700",
         border: "border-emerald-300"
-    };
+    }
+};
+
+// 기준값 (필요하면 여기 숫자만 바꾸면 됨)
+const TEMP_DANGER_LOW = 5;     // 이하: 동파 위험
+const TEMP_WARN_LOW = 10;      // 이하: 저온 주의
+const TEMP_WARN_HIGH = 30;     // 이상: 고온 주의
+const TEMP_DANGER_HIGH = 35;   // 이상: 고온 위험
+const HUM_WARN = 70;           // 이상: 습도 주의
+const HUM_DANGER = 90;         // 이상: 누수 의심(위험)
+
+export function getStatusInfo(temp, humidity, airQuality) {
+
+    // ---- 위험 ----
+    if (temp <= TEMP_DANGER_LOW) {
+        return { label: "🚨 동파 위험", ...STYLE.danger };
+    }
+
+    if (temp >= TEMP_DANGER_HIGH) {
+        return { label: "🚨 고온 위험", ...STYLE.danger };
+    }
+
+    if (humidity >= HUM_DANGER) {
+        return { label: "🚨 누수 의심", ...STYLE.danger };
+    }
+
+    // ---- 경고(주의) ----
+    if (temp >= TEMP_WARN_HIGH) {
+        return { label: "⚠ 고온 주의", ...STYLE.warning };
+    }
+
+    if (temp <= TEMP_WARN_LOW) {
+        return { label: "⚠ 저온 주의", ...STYLE.warning };
+    }
+
+    if (humidity >= HUM_WARN) {
+        return { label: "⚠ 습도 주의", ...STYLE.warning };
+    }
+
+    if (airQuality === "나쁨") {
+        return { label: "⚠ 악취 발생", ...STYLE.warning };
+    }
+
+    return { label: "🟢 정상", ...STYLE.normal };
 
 }
 
